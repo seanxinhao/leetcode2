@@ -1,5 +1,5 @@
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
 /*
  * @lc app=leetcode id=416 lang=java
@@ -10,28 +10,24 @@ import java.util.Set;
 // @lc code=start
 class Solution {
     public boolean canPartition(int[] nums) {
-        Set<Integer> visited = new HashSet<>();
-        return canParition(nums, 0, 0, visited);
-    }
+        int sum = IntStream.of(nums).sum();
+        if (sum == 0 || sum % 2 != 0 || nums.length < 2) {
+            return false;
+        }
+        int target = sum / 2;
+        int[] dp = new int[target + 1];
+        Arrays.fill(dp, 0);
+        dp[0] = 1;
 
-    private boolean canParition(int[] nums, int sum1, int sum2, Set<Integer> visited) {
-        if (visited.size() == nums.length && sum1 == sum2) {
-            return true;
-        }
-        for (int i = 0; i < nums.length; i++) {
-            int num = nums[i];
-            if (visited.contains(i)) {
-                continue;
-            }
-            visited.add(i);
-            boolean sub1 = canParition(nums, sum1 + num, sum2, visited);
-            boolean sub2 = canParition(nums, sum1, sum2 + num, visited);
-            visited.remove(i);
-            if (sub1 || sub2) {
-                return true;
+        for (int num : nums) {
+            for (int i = target; i >= 1; i--) {
+                if (i - num >= 0 && dp[i - num] > 0) {
+                    dp[i]++;
+                }
             }
         }
-        return false;
+
+        return dp[target] > 0;
     }
 }
 // @lc code=end
