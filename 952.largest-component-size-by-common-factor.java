@@ -1,7 +1,3 @@
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.IntStream;
-
 /*
  * @lc app=leetcode id=952 lang=java
  *
@@ -11,8 +7,10 @@ import java.util.stream.IntStream;
 // @lc code=start
 class Solution {
     public int largestComponentSize(int[] A) {
-        int n = A.length;
-        int max = IntStream.of(A).max().getAsInt();
+        int max = 0;
+        for (int a : A) {
+            max = Math.max(max, a);
+        }
         UnionFindSet ufs = new UnionFindSet(max + 1);
         // Solution of finding GCD got TLE.
         // UnionFindSet ufs = new UnionFindSet(n);
@@ -23,33 +21,36 @@ class Solution {
         //         }
         //     }
         // }
-        for (int i = 0; i < n; i++) {
-            for (int f = 2; f * f <= A[i]; f++) {
-                if (A[i] % f == 0) {
-                    ufs.union(A[i], f);
-                    ufs.union(A[i], A[i] / f);
+        for (int a : A) {
+            for (int f = 2; f * f <= a; f++) {
+                if (a % f == 0) {
+                    ufs.union(a, f);
+                    ufs.union(a, a / f);
                 }
             }
         }
 
-        Map<Integer, Integer> counts = new LinkedHashMap<>(n);
-        max = 0;
-        for (int i = 0; i < n; i++) {
-            int p = ufs.find(A[i]);
-            int count = counts.getOrDefault(p, 0) + 1;
-            counts.put(p, count);
-            max = Math.max(max, count);
+        int[] counts = new int[max + 1];
+        int res = 0;
+        for (int a : A) {
+            int p = ufs.find(a);
+            counts[p]++;
+            res = Math.max(res, counts[p]);
         }
-        return max;
+        return res;
     }
 
-    class UnionFindSet {
-        int[] parrents;
+    // UFS without size optimization will TLE.
+    static class UnionFindSet {
+        private int[] parrents;
+        private int[] size;
 
         public UnionFindSet(int n) {
             parrents = new int[n];
+            size = new int[n];
             for (int i = 0; i < n; i++) {
                 parrents[i] = i;
+                size[i] = 1;
             }
         }
 
@@ -62,7 +63,17 @@ class Solution {
         }
 
         public void union(int a, int b) {
-            parrents[find(a)] = parrents[find(b)];
+            int pa = find(a);
+            int pb = find(b);
+            if (pa != pb) {
+                if (size[pa] > size[pb]) {
+                    parrents[pb] = pa;
+                    size[pa] += size[pb];
+                } else {
+                    parrents[pa] = pb;
+                    size[pb] += size[pa];
+                }
+            }
         }
     }
 }
