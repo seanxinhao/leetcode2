@@ -21,9 +21,25 @@
  * }
  */
 class Solution {
+    private List<Integer> inorder = new ArrayList<>();
+
     public boolean isValidBST(TreeNode root) {
-        
+        traverse(root);
+        for (int i = 0; i < inorder.size() - 1; i++) {
+            if (inorder.get(i) >= inorder.get(i + 1)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void traverse(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+        traverse(root.left);
+        inorder.add(root.val);
+        traverse(root.right);
     }
 }
 // @lc code=end
-
